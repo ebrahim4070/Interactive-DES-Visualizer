@@ -2,6 +2,10 @@
 
 > An interactive, educational web application for exploring and understanding the **Data Encryption Standard (DES)** algorithm — step by step, bit by bit.
 
+🌐 **Live Demo:** [https://ebrahim4070.github.io/Interactive-DES-Visualizer/](https://ebrahim4070.github.io/Interactive-DES-Visualizer/)
+
+[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-GitHub_Pages-brightgreen?style=for-the-badge)](https://ebrahim4070.github.io/Interactive-DES-Visualizer/)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Vanilla JS](https://img.shields.io/badge/Vanilla-JavaScript-yellow.svg)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![HTML5](https://img.shields.io/badge/HTML-5-orange.svg)](https://developer.mozilla.org/en-US/docs/Web/HTML)
