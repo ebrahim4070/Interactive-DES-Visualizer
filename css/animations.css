@@ -1,0 +1,224 @@
+/**
+ * css/animations.css
+ * All keyframe animations and reusable animation utility classes.
+ */
+
+/* ============================================================
+   KEYFRAMES
+   ============================================================ */
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Bit reveal — each bit pops in */
+@keyframes bitReveal {
+  0%   { opacity: 0; transform: scale(0.6) rotateY(90deg); }
+  60%  { transform: scale(1.1) rotateY(0); }
+  100% { opacity: 1; transform: scale(1) rotateY(0); }
+}
+
+/* Bit pulse — briefly pulses active bits */
+@keyframes bitPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.7); }
+  70%  { box-shadow: 0 0 0 8px rgba(234, 179, 8, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0); }
+}
+
+/* Glow pulse — for active flowchart node */
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(108, 99, 255, 0.6), 0 0 24px rgba(108, 99, 255, 0.3); }
+  50%       { box-shadow: 0 0 20px rgba(108, 99, 255, 0.9), 0 0 40px rgba(108, 99, 255, 0.5); }
+}
+
+/* Progress bar fill */
+@keyframes progressFill {
+  from { width: 0%; }
+}
+
+/* Shimmer loading */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+/* Float — gentle up/down for hero elements */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
+}
+
+/* Spin — loading spinner */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Result flash */
+@keyframes resultFlash {
+  0%   { background: rgba(108, 99, 255, 0.20); }
+  100% { background: transparent; }
+}
+
+/* Round pill appear */
+@keyframes pillPop {
+  0%   { transform: scale(0.8); opacity: 0; }
+  70%  { transform: scale(1.15); }
+  100% { transform: scale(1);    opacity: 1; }
+}
+
+/* Connector draw */
+@keyframes drawLine {
+  from { stroke-dashoffset: 100; }
+  to   { stroke-dashoffset: 0; }
+}
+
+/* Toast slide in */
+@keyframes toastSlideIn {
+  from { opacity: 0; transform: translateX(100%) scale(0.9); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+/* Toast slide out */
+@keyframes toastSlideOut {
+  from { opacity: 1; transform: translateX(0) scale(1); }
+  to   { opacity: 0; transform: translateX(100%) scale(0.9); }
+}
+
+/* Hero grid cells */
+@keyframes gridFade {
+  0%, 100% { opacity: 0.03; }
+  50%       { opacity: 0.08; }
+}
+
+/* ============================================================
+   ANIMATION UTILITY CLASSES
+   ============================================================ */
+
+.anim-fade-in        { animation: fadeIn      0.4s ease both; }
+.anim-fade-in-down   { animation: fadeInDown  0.5s ease both; }
+.anim-fade-in-up     { animation: fadeInUp    0.5s ease both; }
+.anim-scale-in       { animation: scaleIn     0.35s var(--transition-bounce) both; }
+.anim-slide-right    { animation: slideInRight 0.4s ease both; }
+.anim-float          { animation: float 3s ease-in-out infinite; }
+
+/* Stagger helpers (add more as needed) */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+
+/* ============================================================
+   BIT ANIMATION
+   ============================================================ */
+
+.bit {
+  animation: bitReveal 0.3s var(--transition-bounce) both;
+}
+
+.bit--yellow {
+  animation: bitReveal 0.3s var(--transition-bounce) both,
+             bitPulse  1.5s 0.3s ease infinite;
+}
+
+/* ============================================================
+   RESULT FLASH
+   ============================================================ */
+
+.result--flash {
+  animation: resultFlash 0.6s ease both;
+  border-radius: var(--radius-md);
+}
+
+/* ============================================================
+   LOADING SPINNER
+   ============================================================ */
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--border-soft);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.vis-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-8);
+  color: var(--text-secondary);
+}
+
+/* ============================================================
+   SHIMMER (skeleton loading)
+   ============================================================ */
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--bg-card) 25%,
+    var(--bg-elevated) 50%,
+    var(--bg-card) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ============================================================
+   FLOWCHART ARROW ANIMATION
+   ============================================================ */
+
+.flowchart__arrow-line {
+  width: 2px;
+  height: 100%;
+  background: var(--border-subtle);
+  margin: 0 auto;
+  transition: background var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.flowchart__arrow--active .flowchart__arrow-line::after {
+  content: '';
+  position: absolute;
+  top: -100%;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent, var(--color-primary), transparent);
+  animation: slideInDown 0.8s ease infinite;
+}
+
+@keyframes slideInDown {
+  from { top: -100%; }
+  to   { top: 100%; }
+}

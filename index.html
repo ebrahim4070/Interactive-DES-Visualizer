@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Interactive DES Encryption & Decryption Visualizer — Learn how DES works step by step with animated, colorful visualizations. Perfect for students and educators." />
+  <meta name="keywords" content="DES, encryption, decryption, visualizer, cryptography, education, Feistel, S-box" />
+  <meta name="author" content="Interactive DES Visualizer" />
+  <meta property="og:title" content="Interactive DES Encryption & Decryption Visualizer" />
+  <meta property="og:description" content="Learn DES Encryption Visually Step by Step" />
+  <title>Interactive DES Encryption & Decryption Visualizer</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/visualizer.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     TOAST CONTAINER
+     ═══════════════════════════════════════════════════════════ -->
+<div id="toast-container" aria-live="polite" aria-label="Notifications"></div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     WELCOME MODAL
+     ═══════════════════════════════════════════════════════════ -->
+<div id="welcome-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
+  <div class="modal">
+    <button id="welcome-close" class="modal__close" aria-label="Close">×</button>
+    <div class="welcome-modal__icon">🔐</div>
+    <h2 id="welcome-title" class="welcome-modal__title">Welcome to DES Visualizer</h2>
+    <p class="welcome-modal__subtitle">An interactive educational tool for understanding the Data Encryption Standard</p>
+    <div class="welcome-steps">
+      <div class="welcome-step">
+        <div class="welcome-step__num">1</div>
+        <div class="welcome-step__text"><strong>Encrypt & Decrypt</strong> — Enter text + 8-char key and get instant results in Hex, Base64 or Binary</div>
+      </div>
+      <div class="welcome-step">
+        <div class="welcome-step__num">2</div>
+        <div class="welcome-step__text"><strong>Step Visualizer</strong> — Watch every DES operation animate step-by-step with full explanations</div>
+      </div>
+      <div class="welcome-step">
+        <div class="welcome-step__num">3</div>
+        <div class="welcome-step__text"><strong>Keyboard shortcuts</strong> — Use ← → for prev/next, Space to play/pause, R to reset</div>
+      </div>
+      <div class="welcome-step">
+        <div class="welcome-step__num">4</div>
+        <div class="welcome-step__text"><strong>Learn DES History</strong> — Visit the About DES page for in-depth educational content</div>
+      </div>
+    </div>
+    <div class="welcome-modal__actions">
+      <button id="welcome-start" class="btn btn--primary btn--lg">🚀 Get Started</button>
+      <button id="welcome-close-2" class="btn btn--secondary" onclick="document.getElementById('welcome-modal').classList.add('hidden'); localStorage.setItem('des_welcome_seen','1')">Maybe Later</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     KEYBOARD SHORTCUTS MODAL
+     ═══════════════════════════════════════════════════════════ -->
+<div id="shortcuts-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+  <div class="modal">
+    <button id="shortcuts-close" class="modal__close" aria-label="Close">×</button>
+    <h3 style="margin-bottom: var(--space-4)">⌨️ Keyboard Shortcuts</h3>
+    <div class="shortcuts-grid">
+      <span class="shortcut-key">←</span>         <span class="shortcut-desc">Previous step</span>
+      <span class="shortcut-key">→</span>         <span class="shortcut-desc">Next step</span>
+      <span class="shortcut-key">Space</span>     <span class="shortcut-desc">Play / Pause</span>
+      <span class="shortcut-key">R</span>         <span class="shortcut-desc">Reset visualization</span>
+    </div>
+    <p style="margin-top: var(--space-4); font-size: var(--text-xs); color: var(--text-muted)">
+      Shortcuts active only when the Visualizer section is open and no input is focused.
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     HEADER
+     ═══════════════════════════════════════════════════════════ -->
+<header class="header" role="banner">
+  <div class="header__inner">
+
+    <!-- Logo -->
+    <a class="header__logo" href="#" data-nav="home" aria-label="Home">
+      <div class="logo-icon">🔐</div>
+      <div class="logo-text">
+        DES Visualizer
+        <span>Interactive Cryptography</span>
+      </div>
+    </a>
+
+    <!-- Mobile toggle -->
+    <button id="nav-toggle" class="nav__toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-menu">
+      <span></span><span></span><span></span>
+    </button>
+
+    <!-- Nav -->
+    <nav class="nav" aria-label="Main navigation">
+      <ul id="nav-menu" class="nav__menu" role="list">
+        <li><a class="nav__link" href="#" data-section="home"       role="menuitem">🏠 Home</a></li>
+        <li><a class="nav__link" href="#" data-section="encrypt"    role="menuitem">🔒 Encrypt</a></li>
+        <li><a class="nav__link" href="#" data-section="decrypt"    role="menuitem">🔓 Decrypt</a></li>
+        <li><a class="nav__link" href="#" data-section="visualizer" role="menuitem">📊 DES Visualizer</a></li>
+        <li><a class="nav__link" href="#" data-section="about"      role="menuitem">📖 About DES</a></li>
+      </ul>
+    </nav>
+
+    <!-- Header actions -->
+    <div class="header__actions">
+      <button id="shortcuts-btn" class="btn-icon" data-tooltip="Keyboard Shortcuts" aria-label="Keyboard shortcuts">⌨️</button>
+      <button id="theme-toggle"  class="btn-icon" aria-label="Toggle theme">☀️ Light</button>
+    </div>
+
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MAIN CONTENT
+     ═══════════════════════════════════════════════════════════ -->
+<main id="main-content">
+
+  <!-- ===========================================================
+       HOME SECTION
+       =========================================================== -->
+  <section id="home" class="section--hidden" aria-labelledby="home-title">
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero__eyebrow">🎓 Educational Cryptography Tool</div>
+      <h1 id="home-title" class="hero__title">
+        Interactive <span class="gradient-text">DES Encryption</span><br />
+        &amp; Decryption Visualizer
+      </h1>
+      <p class="hero__subtitle">
+        Learn how the Data Encryption Standard works — step by step, bit by bit,
+        with beautiful animated visualizations designed for students and educators.
+      </p>
+      <div class="hero__cta">
+        <button class="btn btn--primary btn--lg" data-nav="visualizer">📊 Start Visualizing</button>
+        <button class="btn btn--secondary btn--lg" data-nav="encrypt">🔒 Try Encryption</button>
+        <button class="btn btn--secondary btn--lg" data-nav="about">📖 Learn DES</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-item">
+        <span class="stat-item__number">16</span>
+        <div class="stat-item__label">Feistel Rounds</div>
+      </div>
+      <div class="stat-item">
+        <span class="stat-item__number">64</span>
+        <div class="stat-item__label">Bit Block Size</div>
+      </div>
+      <div class="stat-item">
+        <span class="stat-item__number">56</span>
+        <div class="stat-item__label">Effective Key Bits</div>
+      </div>
+      <div class="stat-item">
+        <span class="stat-item__number">8</span>
+        <div class="stat-item__label">S-Boxes</div>
+      </div>
+      <div class="stat-item">
+        <span class="stat-item__number">100+</span>
+        <div class="stat-item__label">Visualization Steps</div>
+      </div>
+    </div>
+
+    <!-- Feature Cards -->
+    <div class="features-grid">
+      <div class="feature-card anim-fade-in-up delay-100">
+        <span class="feature-card__icon">🔀</span>
+        <div class="feature-card__title">Step-by-Step Visualizer</div>
+        <div class="feature-card__desc">Watch every DES operation animate — from Initial Permutation through all 16 Feistel rounds to the final ciphertext.</div>
+      </div>
+      <div class="feature-card anim-fade-in-up delay-200">
+        <span class="feature-card__icon">🎲</span>
+        <div class="feature-card__title">S-Box Explained</div>
+        <div class="feature-card__desc">Each of the 8 S-boxes is shown with row/column selection highlighted. Understand the non-linear heart of DES security.</div>
+      </div>
+      <div class="feature-card anim-fade-in-up delay-300">
+        <span class="feature-card__icon">⊕</span>
+        <div class="feature-card__title">Live Bit Comparison</div>
+        <div class="feature-card__desc">Before/After bit grids with color coding — green = unchanged, red = changed, yellow = active, blue = current operation.</div>
+      </div>
+      <div class="feature-card anim-fade-in-up delay-400">
+        <span class="feature-card__icon">🔑</span>
+        <div class="feature-card__title">Full Key Schedule</div>
+        <div class="feature-card__desc">Visualize how one 64-bit key generates 16 unique 48-bit round subkeys through PC-1, left shifts, and PC-2.</div>
+      </div>
+      <div class="feature-card anim-fade-in-up delay-100">
+        <span class="feature-card__icon">📈</span>
+        <div class="feature-card__title">Multi-Format Output</div>
+        <div class="feature-card__desc">View encrypted output in Hexadecimal, Base64, or Binary. Copy, download, or use in decryption instantly.</div>
+      </div>
+      <div class="feature-card anim-fade-in-up delay-200">
+        <span class="feature-card__icon">⚡</span>
+        <div class="feature-card__title">Playback Speed Control</div>
+        <div class="feature-card__desc">Set autoplay speed from 0.5× to 4×, jump to any round, or step manually with keyboard shortcuts.</div>
+      </div>
+    </div>
+
+    <!-- Mini-demo pipeline diagram -->
+    <div style="text-align:center; margin-top: var(--space-16); margin-bottom: var(--space-8);">
+      <p style="font-size: var(--text-sm); color: var(--text-muted); margin-bottom: var(--space-4);">DES PIPELINE OVERVIEW</p>
+      <div style="display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap: var(--space-2); font-size: var(--text-sm);">
+        <span style="background:rgba(108,99,255,0.2);border:1px solid rgba(108,99,255,0.4);padding:6px 12px;border-radius:8px;color:var(--color-primary-light)">📄 Plain Text</span>
+        <span style="color:var(--text-muted)">→</span>
+        <span style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.3);padding:6px 12px;border-radius:8px;color:var(--color-secondary)">🔀 IP</span>
+        <span style="color:var(--text-muted)">→</span>
+        <span style="background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.3);padding:6px 12px;border-radius:8px;color:var(--bit-active)">✂️ Split</span>
+        <span style="color:var(--text-muted)">→</span>
+        <span style="background:rgba(108,99,255,0.15);border:1px solid rgba(108,99,255,0.3);padding:6px 12px;border-radius:8px;color:var(--color-primary-light)">⚙️ 16 Rounds</span>
+        <span style="color:var(--text-muted)">→</span>
+        <span style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.3);padding:6px 12px;border-radius:8px;color:var(--color-secondary)">🔀 FP</span>
+        <span style="color:var(--text-muted)">→</span>
+        <span style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);padding:6px 12px;border-radius:8px;color:var(--bit-unchanged)">🔒 Cipher</span>
+      </div>
+    </div>
+
+  </section><!-- /#home -->
+
+
+  <!-- ===========================================================
+       ENCRYPT SECTION
+       =========================================================== -->
+  <section id="encrypt" class="section section--hidden" aria-labelledby="encrypt-title">
+    <div class="section__header">
+      <div class="section__badge">🔒 Encryption</div>
+      <h2 id="encrypt-title" class="section__title">DES Encryption</h2>
+      <p class="section__subtitle">Enter your plain text and secret key to encrypt. Supports Hex, Base64 and Binary output.</p>
+    </div>
+
+    <div class="section-content--two-col">
+      <!-- LEFT: Input panel -->
+      <div>
+        <div class="glass-card" style="margin-bottom: var(--space-5)">
+          <!-- Plain Text -->
+          <div class="form-group">
+            <label class="form-label" for="enc-plaintext">
+              📄 Plain Text
+              <span class="required">*</span>
+              <span style="margin-left:auto; font-size:var(--text-xs); color:var(--text-muted)" id="enc-char-count">0/8 chars</span>
+            </label>
+            <input
+              type="text"
+              id="enc-plaintext"
+              class="input input--mono"
+              placeholder="Enter up to 8 characters…"
+              maxlength="8"
+              autocomplete="off"
+              spellcheck="false"
+              aria-describedby="enc-plaintext-hint"
+            />
+            <p id="enc-plaintext-hint" style="font-size:var(--text-xs);color:var(--text-muted)">
+              DES processes exactly 8-byte blocks. Shorter text is zero-padded.
+            </p>
+          </div>
+
+          <!-- Secret Key -->
+          <div class="form-group">
+            <label class="form-label" for="enc-key">
+              🔑 Secret Key
+              <span class="required">*</span>
+              <span style="font-size:var(--text-xs);color:var(--text-muted);margin-left:auto">Must be exactly 8 characters</span>
+            </label>
+            <input
+              type="text"
+              id="enc-key"
+              class="input input--mono"
+              placeholder="Enter exactly 8-char key…"
+              maxlength="8"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <div class="key-indicator">
+              <div class="key-dots" id="enc-key-dots">
+                <div class="key-dot"></div><div class="key-dot"></div><div class="key-dot"></div>
+                <div class="key-dot"></div><div class="key-dot"></div><div class="key-dot"></div>
+                <div class="key-dot"></div><div class="key-dot"></div>
+              </div>
+              <span id="enc-key-error" class="input-error-msg"></span>
+            </div>
+          </div>
+
+          <!-- Output Format -->
+          <div class="form-group">
+            <label class="form-label">📋 Output Format</label>
+            <div class="format-tabs">
+              <button class="format-tab format-tab--active" data-format="hex">HEX</button>
+              <button class="format-tab" data-format="base64">BASE64</button>
+              <button class="format-tab" data-format="binary">BINARY</button>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="btn-group" style="margin-top: var(--space-4)">
+            <button id="enc-btn-encrypt"     class="btn btn--primary">🔒 Encrypt</button>
+            <button id="enc-btn-decrypt"     class="btn btn--secondary">🔓 Decrypt This</button>
+            <button id="enc-btn-random-key"  class="btn btn--secondary btn--sm" data-tooltip="Generate random 8-char key">🎲 Random Key</button>
+            <button id="enc-btn-random-text" class="btn btn--secondary btn--sm" data-tooltip="Generate sample text">📝 Sample Text</button>
+            <button id="enc-btn-paste"       class="btn btn--secondary btn--sm">📋 Paste</button>
+            <button id="enc-btn-clear"       class="btn btn--secondary btn--sm">🗑 Clear</button>
+          </div>
+
+          <!-- File controls -->
+          <div class="btn-group" style="margin-top: var(--space-3)">
+            <button id="enc-btn-upload" class="btn btn--secondary btn--sm">📁 Upload .txt</button>
+            <input  id="enc-file-input" type="file" accept=".txt" style="display:none" aria-label="Upload text file" />
+          </div>
+        </div><!-- /.glass-card -->
+
+        <!-- Hidden hex store -->
+        <span id="enc-result-hex" data-hex="" style="display:none"></span>
+
+        <!-- Result panel -->
+        <div class="glass-card">
+          <div class="result-panel">
+            <div class="result-panel__label">🔒 Encrypted Output</div>
+            <div id="enc-result" class="result-output">—</div>
+          </div>
+          <div class="result-stats">
+            <div class="result-stat">
+              <div class="result-stat__label">⏱ Time</div>
+              <div id="enc-time" class="result-stat__value">—</div>
+            </div>
+            <div class="result-stat">
+              <div class="result-stat__label">📝 Chars</div>
+              <div id="enc-chars" class="result-stat__value">—</div>
+            </div>
+            <div class="result-stat">
+              <div class="result-stat__label">📦 Bytes</div>
+              <div id="enc-bytes" class="result-stat__value">—</div>
+            </div>
+          </div>
+          <div class="btn-group" style="margin-top: var(--space-4)">
+            <button id="enc-btn-copy"     class="btn btn--secondary btn--sm">📋 Copy Cipher</button>
+            <button id="enc-btn-download" class="btn btn--secondary btn--sm">⬇️ Download</button>
+          </div>
+        </div>
+      </div><!-- /left col -->
+
+      <!-- RIGHT: History -->
+      <div>
+        <div class="glass-card">
+          <div class="history-panel">
+            <div class="history-panel__header">
+              <h3 class="history-panel__title">📜 Encryption History</h3>
+              <input type="search" id="hist-search" class="input history-search" placeholder="Search history…" style="max-width:200px" aria-label="Search history" />
+            </div>
+            <div class="btn-group" style="margin-bottom: var(--space-3)">
+              <button id="hist-export-json" class="btn btn--secondary btn--sm">⬇️ Export JSON</button>
+              <button id="hist-export-csv"  class="btn btn--secondary btn--sm">⬇️ Export CSV</button>
+              <button id="hist-clear"       class="btn btn--danger btn--sm">🗑 Clear All</button>
+            </div>
+            <div id="hist-list" class="hist-list"></div>
+          </div>
+        </div>
+      </div><!-- /right col -->
+    </div><!-- /two-col -->
+  </section><!-- /#encrypt -->
+
+
+  <!-- ===========================================================
+       DECRYPT SECTION
+       =========================================================== -->
+  <section id="decrypt" class="section section--hidden" aria-labelledby="decrypt-title">
+    <div class="section__header">
+      <div class="section__badge">🔓 Decryption</div>
+      <h2 id="decrypt-title" class="section__title">DES Decryption</h2>
+      <p class="section__subtitle">Enter a hex ciphertext and the same 8-character key to recover the original message.</p>
+    </div>
+
+    <div style="max-width: 700px; margin: 0 auto;">
+      <div class="glass-card">
+        <!-- Cipher Input -->
+        <div class="form-group">
+          <label class="form-label" for="dec-cipher">
+            🔒 Cipher Text (Hexadecimal)
+            <span class="required">*</span>
+          </label>
+          <input
+            type="text"
+            id="dec-cipher"
+            class="input input--mono"
+            placeholder="Enter 16-character hex string (e.g. 85E813540F0AB405)"
+            maxlength="16"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <p style="font-size:var(--text-xs);color:var(--text-muted)">
+            Must be exactly 16 hexadecimal characters (64-bit DES output)
+          </p>
+        </div>
+
+        <!-- Key Input -->
+        <div class="form-group">
+          <label class="form-label" for="dec-key">
+            🔑 Secret Key
+            <span class="required">*</span>
+          </label>
+          <input
+            type="text"
+            id="dec-key"
+            class="input input--mono"
+            placeholder="Enter exactly 8-char key…"
+            maxlength="8"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <span id="dec-key-error" class="input-error-msg"></span>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="btn-group" style="margin-top: var(--space-4)">
+          <button id="dec-btn-decrypt" class="btn btn--cyan">🔓 Decrypt</button>
+          <button id="dec-btn-paste"   class="btn btn--secondary btn--sm">📋 Paste Cipher</button>
+          <button id="dec-btn-clear"   class="btn btn--secondary btn--sm">🗑 Clear</button>
+        </div>
+
+        <!-- Result -->
+        <div class="result-panel" style="margin-top: var(--space-6)">
+          <div class="result-panel__label">📄 Decrypted Plain Text</div>
+          <div id="dec-result" class="result-output" style="color: var(--color-success)">—</div>
+        </div>
+
+        <div class="btn-group" style="margin-top: var(--space-4)">
+          <button id="dec-btn-copy" class="btn btn--secondary btn--sm">📋 Copy Plain Text</button>
+        </div>
+      </div><!-- /.glass-card -->
+
+      <!-- Info box -->
+      <div class="glass-card" style="margin-top: var(--space-5)">
+        <h3 style="font-size:var(--text-base); margin-bottom:var(--space-4)">💡 How Decryption Works</h3>
+        <p style="font-size:var(--text-sm)">
+          DES decryption uses the <strong>exact same algorithm</strong> as encryption — the only difference is that the
+          16 round subkeys are applied in <strong>reverse order</strong> (K₁₆ first, K₁ last). This is the elegance of
+          the Feistel network: one circuit serves both directions.
+        </p>
+        <div style="margin-top:var(--space-4); display:flex; gap:var(--space-3); font-size:var(--text-xs); color:var(--text-muted)">
+          <span>Encrypt: K₁ → K₂ → … → K₁₆</span>
+          <span>|</span>
+          <span>Decrypt: K₁₆ → K₁₅ → … → K₁</span>
+        </div>
+      </div>
+    </div>
+  </section><!-- /#decrypt -->
+
+
+  <!-- ===========================================================
+       VISUALIZER SECTION
+       =========================================================== -->
+  <section id="visualizer" class="section section--hidden" aria-labelledby="vis-title">
+    <div class="section__header" style="margin-bottom: var(--space-6)">
+      <div class="section__badge">📊 Visualizer</div>
+      <h2 id="vis-title" class="section__title">DES Step-by-Step Visualizer</h2>
+      <p class="section__subtitle">Watch every bit transformation with animated explanations across all 16 Feistel rounds.</p>
+    </div>
+
+    <!-- Round Tracker -->
+    <div id="vis-round-track" class="round-track" aria-label="Round progress"></div>
+
+    <!-- Input Panel -->
+    <div class="vis-input-panel">
+      <div class="vis-input-panel__title">🔧 Visualization Setup</div>
+      <div class="vis-inputs-row">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label" for="vis-plaintext">Plain Text (max 8 chars)</label>
+          <input type="text" id="vis-plaintext" class="input input--mono" placeholder="e.g.  HELLO!!!" maxlength="8" autocomplete="off" spellcheck="false" value="HELLO!!!" />
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label" for="vis-key">Secret Key (exactly 8 chars)</label>
+          <input type="text" id="vis-key" class="input input--mono" placeholder="e.g.  SECRET01" maxlength="8" autocomplete="off" spellcheck="false" value="SECRET01" />
+        </div>
+        <button id="vis-start-new" class="btn btn--primary" style="white-space:nowrap">
+          🚀 Start Visualization
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="vis-spinner" class="vis-spinner hidden">
+      <div class="spinner"></div>
+      <span>Generating visualization steps…</span>
+    </div>
+
+    <!-- Main 3-column Layout -->
+    <div class="vis-layout">
+
+      <!-- LEFT: Flowchart -->
+      <div class="vis-flowchart-col">
+        <div class="glass-card" style="padding: var(--space-3)">
+          <div style="font-size:var(--text-xs); font-weight:var(--font-semi); color:var(--text-muted); margin-bottom:var(--space-2); text-align:center; text-transform:uppercase; letter-spacing:0.1em">
+            DES Pipeline
+          </div>
+          <div id="vis-flowchart"></div>
+        </div>
+      </div><!-- /left -->
+
+      <!-- CENTER: Step Player -->
+      <div class="vis-main-col">
+        <!-- Step controls -->
+        <div class="vis-controls">
+          <div class="vis-controls__nav">
+            <button id="vis-start"      class="btn btn--primary btn--sm" disabled>▶ Start</button>
+            <button id="vis-prev"       class="btn btn--secondary btn--sm" disabled aria-label="Previous step">◀ Prev</button>
+            <button id="vis-next"       class="btn btn--secondary btn--sm" disabled aria-label="Next step">Next ▶</button>
+            <button id="vis-play-pause" class="btn btn--secondary btn--sm" disabled>▶ Play</button>
+          </div>
+          <div class="vis-controls__extras">
+            <button id="vis-reset"      class="btn btn--secondary btn--sm">↺ Reset</button>
+            <button id="vis-replay"     class="btn btn--secondary btn--sm">⏮ Replay</button>
+            <button id="vis-sound"      class="btn btn--secondary btn--sm">🔇 Mute</button>
+            <button id="vis-fullscreen" class="btn btn--secondary btn--sm" data-tooltip="Fullscreen">⛶</button>
+            <select id="vis-speed" aria-label="Playback speed">
+              <option value="0.5">0.5×</option>
+              <option value="1" selected>1×</option>
+              <option value="2">2×</option>
+              <option value="4">4×</option>
+            </select>
+            <select id="vis-jump-round" aria-label="Jump to round">
+              <option value="">Jump to Round…</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="vis-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+          <div id="vis-progress-bar" class="vis-progress__bar"></div>
+        </div>
+
+        <!-- Step title + counter -->
+        <div class="vis-step-info">
+          <div id="vis-step-title" class="vis-step-title">Ready — press Start Visualization above</div>
+          <div id="vis-step-counter" class="vis-step-counter">Step 0 of 0</div>
+        </div>
+
+        <!-- Bit area -->
+        <div id="vis-bit-area" class="vis-bit-area">
+          <div class="vis-placeholder">
+            Configure inputs above and press <strong>🚀 Start Visualization</strong> to begin.
+            <br /><br />
+            Then use <strong>◀ Prev</strong> / <strong>Next ▶</strong> or press <strong>Space</strong> to autoplay.
+          </div>
+        </div>
+      </div><!-- /center -->
+
+      <!-- RIGHT: Explanation Panel -->
+      <div class="vis-explain-col">
+        <div class="explanation-panel">
+          <div class="explanation-panel__label">💡 Explanation</div>
+          <div id="vis-explanation">
+            <div class="explanation-placeholder">
+              Explanation will appear here as you step through the visualization.
+              <br /><br />
+              Each step includes:
+              <ul style="margin-top:var(--space-3); font-size:var(--text-xs); color:var(--text-muted)">
+                <li>Why this step exists</li>
+                <li>The mathematical formula</li>
+                <li>Input &amp; output values</li>
+                <li>A worked example</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div><!-- /right -->
+
+    </div><!-- /.vis-layout -->
+
+    <!-- Color Legend -->
+    <div class="glass-card" style="margin-top: var(--space-6)">
+      <h3 style="font-size:var(--text-base); margin-bottom: var(--space-4)">🎨 Color Key</h3>
+      <div style="display:flex; flex-wrap:wrap; gap: var(--space-6)">
+        <div style="display:flex; align-items:center; gap: var(--space-3)">
+          <span class="bit bit--green">0</span>
+          <span style="font-size:var(--text-sm); color:var(--text-secondary)"><strong style="color:var(--bit-unchanged)">Green</strong> — Bit unchanged</span>
+        </div>
+        <div style="display:flex; align-items:center; gap: var(--space-3)">
+          <span class="bit bit--red">1</span>
+          <span style="font-size:var(--text-sm); color:var(--text-secondary)"><strong style="color:var(--bit-changed)">Red</strong> — Bit changed/flipped</span>
+        </div>
+        <div style="display:flex; align-items:center; gap: var(--space-3)">
+          <span class="bit bit--yellow">0</span>
+          <span style="font-size:var(--text-sm); color:var(--text-secondary)"><strong style="color:var(--bit-active)">Yellow</strong> — Currently active</span>
+        </div>
+        <div style="display:flex; align-items:center; gap: var(--space-3)">
+          <span class="bit bit--blue">1</span>
+          <span style="font-size:var(--text-sm); color:var(--text-secondary)"><strong style="color:var(--bit-op)">Blue</strong> — Current operation</span>
+        </div>
+        <div style="display:flex; align-items:center; gap: var(--space-3)">
+          <span class="bit bit--gray">0</span>
+          <span style="font-size:var(--text-sm); color:var(--text-secondary)"><strong style="color:var(--bit-inactive)">Gray</strong> — Inactive / not reached</span>
+        </div>
+      </div>
+    </div>
+
+  </section><!-- /#visualizer -->
+
+
+  <!-- ===========================================================
+       ABOUT DES SECTION
+       =========================================================== -->
+  <section id="about" class="section section--hidden" aria-labelledby="about-title">
+    <h1 id="about-title" class="sr-only">About DES</h1>
+    <div id="about-content">
+      <!-- Populated by about.js -->
+    </div>
+  </section><!-- /#about -->
+
+</main><!-- /#main-content -->
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     FOOTER
+     ═══════════════════════════════════════════════════════════ -->
+<footer class="footer" role="contentinfo">
+  <p>
+    <strong>Interactive DES Encryption &amp; Decryption Visualizer</strong> —
+    An educational tool for learning cryptography.
+    Built with HTML, CSS &amp; Vanilla JavaScript.
+  </p>
+  <p style="margin-top: var(--space-2)">
+    DES is defined in <a href="https://csrc.nist.gov/publications/detail/fips/46/3/archive/1999-10-25" target="_blank" rel="noopener">FIPS 46-3</a>.
+    For modern encryption use <strong>AES-256</strong>.
+  </p>
+</footer>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     JAVASCRIPT — Load in dependency order
+     ═══════════════════════════════════════════════════════════ -->
+
+<!-- DES Engine -->
+<script src="js/des/tables.js"></script>
+<script src="js/des/core.js"></script>
+<script src="js/des/visualizer.js"></script>
+
+<!-- Utilities -->
+<script src="js/utils/format.js"></script>
+<script src="js/utils/history.js"></script>
+<script src="js/utils/fileHandler.js"></script>
+
+<!-- UI Modules -->
+<script src="js/ui/toast.js"></script>
+<script src="js/ui/bitGrid.js"></script>
+<script src="js/ui/roundTrack.js"></script>
+<script src="js/ui/flowchart.js"></script>
+<script src="js/ui/stepPlayer.js"></script>
+<script src="js/ui/encrypt.js"></script>
+<script src="js/ui/decrypt.js"></script>
+
+<!-- Pages -->
+<script src="js/about.js"></script>
+
+<!-- Bootstrap (must be last) -->
+<script src="js/main.js"></script>
+
+<!-- Inline: char counter for plain text input -->
+<script>
+(function() {
+  var pt = document.getElementById('enc-plaintext');
+  var cc = document.getElementById('enc-char-count');
+  var dots = document.querySelectorAll('#enc-key-dots .key-dot');
+  var key  = document.getElementById('enc-key');
+
+  if (pt && cc) {
+    pt.addEventListener('input', function() {
+      cc.textContent = pt.value.length + '/8 chars';
+    });
+  }
+
+  if (key && dots.length) {
+    key.addEventListener('input', function() {
+      var len = key.value.length;
+      dots.forEach(function(dot, i) {
+        dot.classList.toggle('key-dot--filled', i < len && len <= 8);
+        dot.classList.toggle('key-dot--excess',  i < len && len > 8);
+      });
+    });
+  }
+})();
+</script>
+
+</body>
+</html>

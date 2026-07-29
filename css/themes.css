@@ -1,0 +1,53 @@
+/**
+ * css/themes.css
+ * Light theme override — applied when html[data-theme="light"].
+ */
+
+[data-theme="light"] {
+  /* Background */
+  --bg-base:        #f0f2ff;
+  --bg-surface:     #f8f9ff;
+  --bg-card:        #ffffff;
+  --bg-elevated:    #f1f3ff;
+  --bg-hover:       #eaedff;
+
+  /* Glass */
+  --glass-bg:       rgba(255, 255, 255, 0.70);
+  --glass-bg-hover: rgba(255, 255, 255, 0.85);
+  --glass-border:   rgba(108, 99, 255, 0.20);
+  --glass-shadow:   0 8px 32px rgba(108, 99, 255, 0.12);
+
+  /* Text */
+  --text-primary:   #1e1b4b;
+  --text-secondary: #4338ca;
+  --text-muted:     #6366f1;
+  --text-accent:    #7c3aed;
+  --text-code:      #0369a1;
+
+  /* Borders */
+  --border-subtle:  rgba(108, 99, 255, 0.12);
+  --border-soft:    rgba(108, 99, 255, 0.20);
+  --border-strong:  rgba(108, 99, 255, 0.40);
+
+  /* Bit colors — slightly lighter for light bg */
+  --bit-unchanged:  #16a34a;
+  --bit-changed:    #dc2626;
+  --bit-active:     #d97706;
+  --bit-op:         #2563eb;
+  --bit-inactive:   #9ca3af;
+}
+
+[data-theme="light"] body {
+  background-image:
+    radial-gradient(ellipse 80% 60% at 20% -10%, rgba(108, 99, 255, 0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 110%, rgba(0, 212, 255, 0.06) 0%, transparent 60%);
+}
+
+[data-theme="light"] code {
+  background: rgba(108, 99, 255, 0.08);
+  color: var(--text-code);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-track { background: #e8eaf6; }
+[data-theme="light"] ::-webkit-scrollbar-thumb { background: rgba(108, 99, 255, 0.35); }
+[data-theme="light"] ::selection { background: rgba(108, 99, 255, 0.25); }
